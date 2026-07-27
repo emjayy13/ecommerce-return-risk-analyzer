@@ -5,7 +5,7 @@ const cors = require("cors");
 const customerRoutes = require("./routes/customerRoutes");
 const returnRoutes = require("./routes/returnRoutes");
 const app = express();
-
+const dashboardRoutes = require("./routes/dashboardRoutes");
 dotenv.config();
 connectDB();
 
@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/customers", customerRoutes);
 app.use("/api/returns", returnRoutes);
-
+app.use("/api/dashboard", dashboardRoutes);
 app.get("/", (req, res) => {
   res.send("Customer Return Risk Analyzer API is running 🚀");
 });

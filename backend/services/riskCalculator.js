@@ -1,11 +1,13 @@
 const RISKY_CATEGORIES = ["Fashion", "Shoes"];
 
-function calculateRiskScore({
+const calculateRiskScore = ({
   returnRatio,
   avgReturnWindow,
   riskyCategoryCount,
   vagueReasonCount,
-}) {
+  avgCustomerRating,
+  mismatchHistory,
+}) => {
   let score = 0;
 
   // Rule 1
@@ -26,6 +28,16 @@ function calculateRiskScore({
   // Rule 4
   if (vagueReasonCount > 2) {
     score += 25;
+  }
+
+  // Low ratings + frequent returns
+  if (avgCustomerRating <= 2.5) {
+    score += 10;
+  }
+
+  // Previous mismatch history
+  if (mismatchHistory > 0) {
+    score += 20;
   }
 
   // Keep score within 0–100

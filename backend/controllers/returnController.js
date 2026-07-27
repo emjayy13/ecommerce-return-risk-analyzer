@@ -1,6 +1,9 @@
 const Customer = require("../models/Customer");
 const Return = require("../models/Return");
-
+const {
+  calculateRiskScore,
+  RISKY_CATEGORIES,
+} = require("../services/riskCalculator");
 const createReturn = async (req, res) => {
   try {
     const {
@@ -34,10 +37,62 @@ const createReturn = async (req, res) => {
       mismatchFlag,
     });
 
+    existingCustomer.totalReturns += 1;
+
+    const customerReturns = await Return.find({
+      customer: existingCustomer._id,
+    });
+
+    const returnRatio =
+      existingCustomer.totalReturns / existingCustomer.totalOrders;
+
+    const avgReturnWindow =
+      customerReturns.reduce(
+        (sum, item) => sum + item.daysToReturn,
+        0
+      ) / customerReturns.length;
+
+    const riskyCategoryCount = customerReturns.filter((item) =>
+      RISKY_CATEGORIES.includes(item.category)
+    ).length;
+
+    const vagueReasonCount = customerReturns.filter((item) =>
+      ["Defective", "Other"].includes(item.reason)
+    ).length;
+
+    const avgCustomerRating =
+    customerReturns.reduce(
+      (sum, item) => sum + item.customerRating,
+      0
+    ) / customerReturns.length;
+
+    const mismatchHistory = customerReturns.filter(
+      (item) => item.mismatchFlag
+    ).length;
+
+    const { score, riskLevel } = calculateRiskScore({
+      returnRatio,
+      avgReturnWindow,
+      riskyCategoryCount,
+      vagueReasonCount,
+      avgCustomerRating,
+      mismatchHistory,
+    });
+
+    existingCustomer.riskScore = score;
+    existingCustomer.riskLevel = riskLevel;
+
+    await existingCustomer.save();
+
+
     res.status(201).json({
       success: true,
       message: "Return created successfully",
-      data: newReturn,
+      data: {
+        return: newReturn,
+        riskScore: score,
+        riskLevel: riskLevel,
+      },
     });
   } catch (error) {
     res.status(500).json({

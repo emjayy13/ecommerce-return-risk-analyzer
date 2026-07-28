@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv('../data/customer_features.csv')
+df = pd.read_csv('../../data/customer_features.csv')
 
 print("return_ratio stats:")
 print(df['return_ratio'].describe())

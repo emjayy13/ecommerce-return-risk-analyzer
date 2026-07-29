@@ -3,7 +3,7 @@ import './App.css'
 import CustomerTable from './components/CustomerTable.jsx'
 import SummaryCard from './components/SummaryCard.jsx'
 import CustomerDetailModal from './components/CustomerDetailModal.jsx'
-import { customers,summaryMetrics } from './data/mockDashboardData.js'
+import { customers} from './data/mockDashboardData.js'
 import CategoryReturnsChart from './components/CategoryReturnsChart.jsx'
 import RiskSegmentsChart from './components/RiskSegmentsChart.jsx'
 import ReturnTrendChart from './components/ReturnTrendChart.jsx'
@@ -94,6 +94,41 @@ function App() {
     const categoryReturnData = buildCategoryReturnData(customers)
     const riskSegmentData = buildRiskLevelData(customers)
     const returnTrendData = buildReturnTrendData(customers)
+
+      const totalReturns = customers.reduce(
+    (total, customer) => total + customer.totalReturns,
+    0,
+  )
+
+  const averageReturnRatio =
+    customers.length === 0
+      ? 0
+      : customers.reduce(
+          (total, customer) => total + customer.totalReturns / customer.totalOrders,
+          0,
+        ) / customers.length
+
+  const highRiskCustomerCount = customers.filter(
+    (customer) => customer.riskLevel === 'High',
+  ).length
+
+  const summaryMetrics = [
+    {
+      label: 'Total Returns',
+      value: totalReturns.toLocaleString(),
+      helperText: 'Across all customers',
+    },
+    {
+      label: 'Average Return Ratio',
+      value: `${(averageReturnRatio * 100).toFixed(1)}%`,
+      helperText: 'Across all customers',
+    },
+    {
+      label: 'High-Risk Customers',
+      value: highRiskCustomerCount,
+      helperText: 'Risk score above 70',
+    },
+  ]
 
   return (
     <main>

@@ -10,7 +10,7 @@ function CustomerTable({ customers,totalCustomers, onViewProfile }) {
           <thead> {/*represents the columns of the table. It contains a single row (tr) with multiple header cells (th). Each th element represents a column header, such as "Customer", "Category", "Return Ratio", "Risk Score", "Risk Level", and "Profile". */}
             <tr> {/*it is a single row in the table header. It contains multiple header cells (th) that define the column names for the customer data. */}
               <th>Customer</th>
-              <th>Category</th>
+              
               <th>Return Ratio</th>
               <th>Risk Score</th>
               <th>Risk Level</th>
@@ -22,7 +22,7 @@ function CustomerTable({ customers,totalCustomers, onViewProfile }) {
             
             {customers.length === 0 ? (
               <tr>
-                <td className="empty-table-message" colSpan="6">
+                <td className="empty-table-message" colSpan="5">
                   No customers match the selected filters.
                 </td>
               </tr>
@@ -30,7 +30,7 @@ function CustomerTable({ customers,totalCustomers, onViewProfile }) {
               customers.map((customer) => (
                 <tr key={customer.id}>
                   <td>{customer.name}</td>
-                  <td>{customer.category}</td>
+                  
                   <td>{Math.round(customer.returnRatio * 100)}%</td>
                   <td>{customer.riskScore}</td>
                   <td>{customer.riskLevel}</td>

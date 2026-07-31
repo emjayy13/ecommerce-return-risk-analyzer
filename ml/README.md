@@ -1,12 +1,12 @@
 # E-Commerce Customer Return Risk Analyzer - ML Subsystem (v2)
 
-This directory contains the Machine Learning module for predicting customer return risk scores (0–100) based on historical customer behavior and independent ground-truth audit labels.
+This directory contains the Machine Learning module for predicting customer return risk scores (0-100) based on historical customer behavior and independent ground-truth audit labels.
 
-> 📖 **Full Master Technical & Interviewer Documentation**: See [docs/PROJECT_ML_DOCUMENTATION.md](file:///c:/Users/mohit/Desktop/ecommerce-return-risk-analyzer/docs/PROJECT_ML_DOCUMENTATION.md) for full pipeline details, metrics, and 12 interviewer Q&As.
+> **Full Master Technical & Interviewer Documentation**: See [docs/PROJECT_ML_DOCUMENTATION.md](file:///c:/Users/mohit/Desktop/ecommerce-return-risk-analyzer/docs/PROJECT_ML_DOCUMENTATION.md) for full pipeline details, metrics, and 12 interviewer Q&As.
 
 ---
 
-## 📌 Architecture Overview
+## Architecture Overview
 
 ```
 ml/
@@ -39,7 +39,7 @@ ml/
 
 ---
 
-## 🛠️ ML Pipeline & Continuous Learning Steps
+## ML Pipeline & Continuous Learning Steps
 
 1. **Preprocessing (`src/preprocess.py`)**:
    - Cleans raw synthetic e-commerce return data.
@@ -64,7 +64,7 @@ ml/
 
 ---
 
-## 🚀 Running API & Tests
+## Running API & Tests
 
 ### Install Dependencies
 ```bash

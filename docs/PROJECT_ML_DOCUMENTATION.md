@@ -1,51 +1,51 @@
-# 🛡️ Customer Return Risk Analyzer - Complete Technical Master Documentation
+# Customer Return Risk Analyzer - Complete Technical Master Documentation
 > **Production-Grade Machine Learning Subsystem & Continuous Learning Architecture (v2)**
 
 ---
 
-## 📌 Table of Contents
-1. [🚀 Executive Overview & Real-World Problem Statement](#-executive-overview--real-world-problem-statement)
-2. [💡 Core Innovation: Zero Data Leakage Architecture](#-core-innovation-zero-data-leakage-architecture)
-3. [📊 End-to-End Visual Architecture & Mermaid Flowcharts](#-end-to-end-visual-architecture--mermaid-flowcharts)
+## Table of Contents
+1. [Executive Overview & Real-World Problem Statement](#executive-overview--real-world-problem-statement)
+2. [Core Innovation: Zero Data Leakage Architecture](#core-innovation-zero-data-leakage-architecture)
+3. [End-to-End Visual Architecture & Mermaid Flowcharts](#end-to-end-visual-architecture--mermaid-flowcharts)
    - [Diagram 1: End-to-End Data Pipeline & ML Workflow](#diagram-1-end-to-end-data-pipeline--ml-workflow)
    - [Diagram 2: Real-Time Prediction Lifecycle & Risk Scoring](#diagram-2-real-time-prediction-lifecycle--risk-scoring)
    - [Diagram 3: Continuous Learning v2 & Champion vs. Challenger Engine](#diagram-3-continuous-learning-v2--champion-vs-challenger-engine)
-4. [📁 Comprehensive File-by-File Technical Guide](#-comprehensive-file-by-file-technical-guide)
-5. [📊 Feature Engineering & Customer Risk Profiling](#-feature-engineering--customer-risk-profiling)
-6. [🔬 Machine Learning Mathematics, Preprocessing & Classifiers](#-machine-learning-mathematics-preprocessing--classifiers)
-7. [📈 Performance Evaluation & Live 20-Request Batch Results](#-performance-evaluation--live-20-request-batch-results)
-8. [🔄 Continuous Learning v2 Engine (Feedback & Gatekeeper)](#-continuous-learning-v2-engine-feedback--gatekeeper)
-9. [🌐 FastAPI REST API Endpoint Reference](#-fastapi-rest-api-endpoint-reference)
-10. 🥊 [Interviewer Cross-Questioning Master Class (15 Deep-Dive Q&As)](#-interviewer-cross-questioning-master-class-15-deep-dive-qas)
+4. [Comprehensive File-by-File Technical Guide](#comprehensive-file-by-file-technical-guide)
+5. [Feature Engineering & Customer Risk Profiling](#feature-engineering--customer-risk-profiling)
+6. [Machine Learning Mathematics, Preprocessing & Classifiers](#machine-learning-mathematics-preprocessing--classifiers)
+7. [Performance Evaluation & Live 20-Request Batch Results](#performance-evaluation--live-20-request-batch-results)
+8. [Continuous Learning v2 Engine (Feedback & Gatekeeper)](#continuous-learning-v2-engine-feedback--gatekeeper)
+9. [FastAPI REST API Endpoint Reference](#fastapi-rest-api-endpoint-reference)
+10. [Interviewer Cross-Questioning Master Class (15 Deep-Dive Q&As)](#interviewer-cross-questioning-master-class-15-deep-dive-qas)
 
 ---
 
-## 🚀 Executive Overview & Real-World Problem Statement
+## Executive Overview & Real-World Problem Statement
 
-### 🎯 The Problem: E-Commerce Return Abuse & Fraud
+### The Problem: E-Commerce Return Abuse & Fraud
 E-commerce platforms lose billions of dollars annually to return abuse, serial wardrobing (buying items to wear once and return), false "item not as described" claims, and return fraud. 
 Traditional return systems either:
 - **Block returns blindly**, frustrating honest customers and driving down Customer Lifetime Value (CLV).
 - **Approve all returns automatically**, allowing serial abusers to drain profit margins.
 
-### 💡 The Solution: Customer Return Risk Analyzer
+### The Solution: Customer Return Risk Analyzer
 The **Customer Return Risk Analyzer** is an enterprise ML subsystem that evaluates the return behavior of customers based on their historical purchase patterns, return frequencies, claim types, rating behavior, and account age. 
 
 When a return request arrives, the system outputs:
-1. **Risk Score (0–100)**: A continuous risk probability score.
+1. **Risk Score (0-100)**: A continuous risk probability score.
 2. **Risk Level (`Low`, `Medium`, `High`)**: Categorical risk classification.
 3. **Actionable Merchant Recommendation**: Instant auto-approval for Low Risk, verification check for Medium Risk, and manual fraud team review for High Risk.
 
 ---
 
-## 💡 Core Innovation: Zero Data Leakage Architecture
+## Core Innovation: Zero Data Leakage Architecture
 
-### ❌ The Flawed Approach (Target Leakage)
+### The Flawed Approach (Target Leakage)
 In naive ML implementations, developers derive target labels directly from input features using threshold rules:
 $$\text{Target} = (\text{return\_ratio} > 0.15)$$
 **Why this is broken**: The ML model simply learns to memorize the exact mathematical rule written in code. This creates **100% Data Leakage**, producing artificial 1.0 (100%) accuracy scores that fail completely when deployed in the real world.
 
-### ✅ Our Production Solution (Independent Ground-Truth Target)
+### Our Production Solution (Independent Ground-Truth Target)
 In our architecture, the target label **`flagged_by_company` / `is_fraud`** (1 = High Risk/Fraud, 0 = Normal) represents an **independent ground-truth audit label** assigned at customer entity creation (simulating manual fraud investigation, identity verification failures, or merchant chargeback reports).
 
 $$\text{Features } (X) \quad \bot \quad \text{Target Generation Logic } (Y)$$
@@ -54,7 +54,7 @@ The ML model must actually learn the complex non-linear statistical relationship
 
 ---
 
-## 📊 End-to-End Visual Architecture & Mermaid Flowcharts
+## End-to-End Visual Architecture & Mermaid Flowcharts
 
 ### Diagram 1: End-to-End Data Pipeline & ML Workflow
 
@@ -133,7 +133,7 @@ flowchart TD
 
 ---
 
-## 📁 Comprehensive File-by-File Technical Guide
+## Comprehensive File-by-File Technical Guide
 
 | File Path | Primary Responsibility | Key Output / Output Artifact |
 | :--- | :--- | :--- |
@@ -150,7 +150,7 @@ flowchart TD
 
 ---
 
-## 📊 Feature Engineering & Customer Risk Profiling
+## Feature Engineering & Customer Risk Profiling
 
 The model relies on 10 aggregated customer-level features ($X$) that reflect long-term customer behavioral patterns:
 
@@ -167,7 +167,7 @@ The model relies on 10 aggregated customer-level features ($X$) that reflect lon
 
 ---
 
-## 🔬 Machine Learning Mathematics, Preprocessing & Classifiers
+## Machine Learning Mathematics, Preprocessing & Classifiers
 
 ### 1. Data Preprocessing Pipeline
 We use scikit-learn's `ColumnTransformer` to enforce clean data transformation:
@@ -188,7 +188,7 @@ We train and evaluate three distinct model families:
 
 ---
 
-## 📈 Performance Evaluation & Live 20-Request Batch Results
+## Performance Evaluation & Live 20-Request Batch Results
 
 ### 1. Holdout Test Evaluation Results
 
@@ -202,13 +202,13 @@ We train and evaluate three distinct model families:
 In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Desktop/ecommerce-return-risk-analyzer/ml/src/debug/test_20_requests.py)):
 - **Total Requests Evaluated**: 20 requests
 - **Overall Batch Accuracy**: **75.00%** (15 / 20 Correct)
-- **Fraud Recall (Catch Rate)**: **100.00%** (**6 / 6 Fraudulent Customers Correctly Identified — 0 Misses!**)
+- **Fraud Recall (Catch Rate)**: **100.00%** (**6 / 6 Fraudulent Customers Correctly Identified - 0 Misses!**)
 - **ROC-AUC Score**: **0.9762**
 - **Risk Level Breakdown**: 9 Low Risk, 0 Medium Risk, 11 High Risk requests.
 
 ---
 
-## 🔄 Continuous Learning v2 Engine (Feedback & Gatekeeper)
+## Continuous Learning v2 Engine (Feedback & Gatekeeper)
 
 ### Key Components of Continuous Learning v2:
 1. **Feedback Ingestion (`POST /feedback`)**: Receives verified audit outcomes (`actual_fraud_label`: 1 or 0) and appends to `ml/data/feedback_records.csv`.
@@ -218,7 +218,7 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 
 ---
 
-## 🌐 FastAPI REST API Endpoint Reference
+## FastAPI REST API Endpoint Reference
 
 | Method | Endpoint | Description | Sample Payload / Params |
 | :---: | :--- | :--- | :--- |
@@ -233,7 +233,7 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 
 ---
 
-## 🥊 Interviewer Cross-Questioning Master Class (15 Deep-Dive Q&As)
+## Interviewer Cross-Questioning Master Class (15 Deep-Dive Q&As)
 
 ### Q1: Why did you build a Customer Risk Model instead of an Order Return Prediction Model?
 > **Answer**: Predicting whether a single order will be returned is an order classification task that doesn't capture customer intent. A customer returning an ill-fitting shoe is normal shopping behavior, whereas a customer making 10 suspicious "wrong item" claims across high-risk electronics is return abuse. By building a **Customer Return Risk Analyzer**, we quantify long-term customer abuse risk, enabling merchants to protect profit margins while maintaining smooth return experiences for honest customers.
@@ -247,7 +247,7 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 ---
 
 ### Q3: Why did you select Logistic Regression as your Champion model over Random Forest or Gradient Boosting?
-> **Answer**: We evaluated all candidate models using 5-Fold Stratified Cross-Validation. Logistic Regression achieved the highest **ROC-AUC (0.9799)** and **100% Recall on fraud cases** on the holdout test set, outperforming Gradient Boosting (0.9775) and Random Forest (0.9514). Additionally, Logistic Regression provides well-calibrated prediction probabilities $P(Y=1 \mid X)$, making it ideal for scaling probabilities into a continuous 0–100 Risk Score.
+> **Answer**: We evaluated all candidate models using 5-Fold Stratified Cross-Validation. Logistic Regression achieved the highest **ROC-AUC (0.9799)** and **100% Recall on fraud cases** on the holdout test set, outperforming Gradient Boosting (0.9775) and Random Forest (0.9514). Additionally, Logistic Regression provides well-calibrated prediction probabilities $P(Y=1 \mid X)$, making it ideal for scaling probabilities into a continuous 0-100 Risk Score.
 
 ---
 
@@ -271,7 +271,7 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 
 ---
 
-### Q8: How is the continuous Risk Score (0–100) calculated from model outputs?
+### Q8: How is the continuous Risk Score (0-100) calculated from model outputs?
 > **Answer**: The ML classifier outputs a probability score $p = P(\text{Fraud} \mid X) \in [0, 1]$. We convert this to a continuous Risk Score via:
 > $$\text{Risk Score} = \text{round}(\max(0, \min(100, p \times 100)), 2)$$
 > The score is mapped into three operational risk tiers:

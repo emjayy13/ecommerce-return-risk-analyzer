@@ -70,14 +70,18 @@ function CustomerDetailModal({ customer, onClose }) {
         <section className="modal__section" aria-labelledby="history-heading">
           <h3 id="history-heading">Recent Return History</h3>
 
-          <ul className="return-history">
-            {customer.returnHistory.map((returnItem) => (
-              <li key={returnItem.date}>
-                <span>{returnItem.reason}</span>
-                <time dateTime={returnItem.date}>{returnItem.date}</time>
-              </li>
-            ))}
-          </ul>
+          {customer.returnHistory.length > 0 ? (
+            <ul className="return-history">
+              {customer.returnHistory.map((returnItem) => (
+                <li key={returnItem.id}>
+                  <span>{returnItem.reason}</span>
+                  <time dateTime={returnItem.date}>{returnItem.date}</time>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No return history recorded.</p>
+          )}
         </section>
       </div>
     </div>

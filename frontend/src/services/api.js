@@ -11,8 +11,25 @@ async function request(path) {
   return payload.data
 }
 
-export function getCustomers() {
-  return request('/customers')
+export function getCustomers(filters = {}) {
+  const searchParams = new URLSearchParams()
+
+  if (filters.risk) {
+    searchParams.set('risk', filters.risk)
+  }
+
+  if (filters.category) {
+    searchParams.set('category', filters.category)
+  }
+
+  if (filters.returnRatio !== '' && filters.returnRatio !== undefined) {
+    searchParams.set('returnRatio', filters.returnRatio)
+  }
+
+  const queryString = searchParams.toString()
+  const path = queryString ? `/customers?${queryString}` : '/customers'
+
+  return request(path)
 }
 
 export function getDashboardSummary() {

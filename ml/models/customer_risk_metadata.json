@@ -1,30 +1,17 @@
 {
-  "version": "v3_LogisticRegression_20260731_225628",
-  "updated_at": "2026-07-31T22:56:28.870623",
+  "version": "v2_LogisticRegression_20260731_231546",
+  "updated_at": "2026-07-31T23:15:46.364635",
   "metrics": {
     "best_model_name": "LogisticRegression",
-    "accuracy": 0.9118,
+    "accuracy": 0.9088,
     "precision": 0.5714,
-    "recall": 1.0,
-    "f1_score": 0.7273,
-    "roc_auc": 0.9799,
-    "pr_auc": 0.8846,
-    "confusion_matrix": [
-      [
-        216,
-        24
-      ],
-      [
-        0,
-        32
-      ]
-    ],
+    "recall": 0.9697,
+    "f1_score": 0.7191,
+    "roc_auc": 0.9762,
+    "pr_auc": 0.8656,
     "cv_scores": {
-      "mean_accuracy": 0.9125,
-      "mean_precision": 0.5789,
-      "mean_recall": 1.0,
-      "mean_f1": 0.733,
-      "mean_roc_auc": 0.9706
+      "mean_accuracy": 0.9123,
+      "mean_roc_auc": 0.9689
     }
   },
   "cv_results": {
@@ -50,18 +37,7 @@
       "mean_roc_auc": 0.9706
     }
   },
-  "features": [
-    "total_orders",
-    "total_returns",
-    "return_ratio",
-    "avg_return_window",
-    "product_category_risk",
-    "vague_reason_count",
-    "mismatch_flag_history",
-    "customer_rating_behavior",
-    "previous_fraud_flags",
-    "account_age_days",
-    "most_common_category"
-  ],
-  "total_customers_in_db": 1358
+  "total_customers_in_db": 1368,
+  "unprocessed_feedback_count": 0,
+  "retrain_threshold": 10
 }

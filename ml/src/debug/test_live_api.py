@@ -1,77 +1,84 @@
 import sys
 import os
-import time
-import threading
-import uvicorn
-import requests
+import json
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from predict import app
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-def start_server():
-    uvicorn.run(app, host="127.0.0.1", port=8005, log_level="error")
+from fastapi.testclient import TestClient
+from predict import app, load_or_train_model
+
+
+def test_api():
+    load_or_train_model()
+    
+    with TestClient(app) as client:
+        print("=" * 60)
+        print("  TESTING FASTAPI CUSTOMER RETURN RISK ANALYZER ENDPOINTS")
+        print("=" * 60)
+
+        # 1. Health check
+        print("\n1. GET /health")
+        res = client.get("/health")
+        print("Status:", res.status_code)
+        print("Response:", res.json())
+        assert res.status_code == 200
+        assert res.json()["model_loaded"] is True
+
+        # 2. Model Metrics
+        print("\n2. GET /model/metrics")
+        res = client.get("/model/metrics")
+        print("Status:", res.status_code)
+        metrics_data = res.json()
+        print(f"Version: {metrics_data.get('version')}")
+        print(f"Metrics summary: Accuracy={metrics_data.get('metrics', {}).get('accuracy')}, ROC-AUC={metrics_data.get('metrics', {}).get('roc_auc')}")
+        assert res.status_code == 200
+
+        # 3. Existing customer prediction
+        print("\n3. POST /predict (Existing Customer)")
+        req_payload = {
+            "customer_id": "CUST000063",
+            "order_id": "ORD00007551",
+            "product_category": "Clothing",
+            "return_reason": "Defective",
+            "is_returned": True
+        }
+        res = client.post("/predict", json=req_payload)
+        print("Status:", res.status_code)
+        print("Response:", json.dumps(res.json(), indent=2))
+        assert res.status_code == 200
+        pred = res.json()
+        assert 0 <= pred["risk_score"] <= 100
+        assert pred["risk_level"] in ["Low", "Medium", "High"]
+
+        # 4. New customer prediction
+        print("\n4. POST /predict (Brand-New Customer)")
+        new_payload = {
+            "customer_id": "CUST_BRAND_NEW_9999",
+            "order_id": "ORD_NEW_001",
+            "product_category": "Electronics",
+            "return_reason": "Changed mind",
+            "is_returned": True
+        }
+        res = client.post("/predict", json=new_payload)
+        print("Status:", res.status_code)
+        print("Response:", json.dumps(res.json(), indent=2))
+        assert res.status_code == 200
+        new_pred = res.json()
+        assert new_pred["prediction_method"] == "new_customer_baseline"
+
+        # 5. Customer Profile Lookup
+        print("\n5. GET /customer/CUST_BRAND_NEW_9999")
+        res = client.get("/customer/CUST_BRAND_NEW_9999")
+        print("Status:", res.status_code)
+        print("Response:", json.dumps(res.json(), indent=2))
+        assert res.status_code == 200
+        assert res.json()["status"] == "existing_customer"
+        assert res.json()["features"]["total_orders"] >= 1
+
+        print("\n" + "=" * 60)
+        print("  ALL API ENDPOINT TESTS PASSED SUCCESSFULLY!")
+        print("=" * 60)
+
 
 if __name__ == "__main__":
-    # Start server in background thread
-    server_thread = threading.Thread(target=start_server, daemon=True)
-    server_thread.start()
-    time.sleep(2) # Give uvicorn a moment to bind
-
-    base_url = "http://127.0.0.1:8005"
-
-    print("=========================================")
-    print("LIVE API PROOF & VERIFICATION TEST")
-    print("=========================================\n")
-
-    # 1. Health check
-    h = requests.get(f"{base_url}/health")
-    print(f"[GET /health] Status: {h.status_code}")
-    print(f"Response: {h.json()}\n")
-
-    # Test cases
-    test_cases = [
-        {
-            "name": "Low Risk Customer Profile",
-            "payload": {
-                "total_orders": 20,
-                "return_ratio": 0.05,
-                "avg_return_window": 15.0,
-                "vague_reason_count": 0,
-                "most_common_category": "Electronics",
-                "mismatch_flag_history": False
-            }
-        },
-        {
-            "name": "Medium Risk Customer Profile",
-            "payload": {
-                "total_orders": 12,
-                "return_ratio": 0.20,
-                "avg_return_window": 5.0,
-                "vague_reason_count": 1,
-                "most_common_category": "Home",
-                "mismatch_flag_history": False
-            }
-        },
-        {
-            "name": "High Risk Customer Profile",
-            "payload": {
-                "total_orders": 8,
-                "return_ratio": 0.45,
-                "avg_return_window": 1.5,
-                "vague_reason_count": 3,
-                "most_common_category": "Clothing",
-                "mismatch_flag_history": True
-            }
-        }
-    ]
-
-    for tc in test_cases:
-        print(f"--- Testing: {tc['name']} ---")
-        print(f"Payload: {tc['payload']}")
-        res = requests.post(f"{base_url}/predict", json=tc['payload'])
-        print(f"HTTP Status: {res.status_code}")
-        print(f"Prediction Result: {res.json()}\n")
-
-    print("=========================================")
-    print("ALL TESTS PASSED SUCCESSFULLY!")
-    print("=========================================")
+    test_api()

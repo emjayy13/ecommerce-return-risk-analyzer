@@ -1,126 +1,217 @@
 import os
-import joblib
+import sys
 import pandas as pd
+from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, ConfigDict
 
+# Ensure current src directory is in path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from customer_risk_model import CustomerRiskModel
+
 app = FastAPI(
-    title="E-Commerce Return Risk Analyzer - ML Prediction API",
-    description="API for predicting customer return risk scores based on order and return history.",
-    version="1.0.0"
+    title="Customer Return Risk Analyzer API",
+    description="API for evaluating customer return risk scores (0–100) based on historical customer return patterns.",
+    version="3.0.0"
 )
 
-# Load model pipeline
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, 'models', 'return_risk_model.pkl')
 
-model = None
+risk_model = CustomerRiskModel()
 
 
-def load_model_binary():
-    global model
-    if os.path.exists(MODEL_PATH):
-        model = joblib.load(MODEL_PATH)
-        print(f"Successfully loaded model from {MODEL_PATH}")
-    else:
-        print(f"Warning: Model file not found at {MODEL_PATH}")
+def load_or_train_model():
+    """Loads existing trained model or runs training pipeline if missing."""
+    global risk_model
+    if not risk_model.load_model():
+        print("Model file not found. Running initial training pipeline...")
+        features_csv = os.path.join(BASE_DIR, 'data', 'customer_features.csv')
+        if os.path.exists(features_csv):
+            customer_df = pd.read_csv(features_csv)
+            risk_model.train(customer_df)
+        else:
+            from train import run_full_ml_pipeline
+            risk_model = run_full_ml_pipeline()
 
 
 @app.on_event("startup")
 def startup_event():
-    load_model_binary()
+    load_or_train_model()
 
 
-class CustomerFeatureInput(BaseModel):
-    total_orders: int = Field(..., description="Total number of orders placed by customer", example=10)
-    return_ratio: float = Field(..., description="Ratio of returned orders (0.0 to 1.0)", example=0.25)
-    avg_return_window: float = Field(..., description="Average days taken to return an order", example=4.5)
-    vague_reason_count: int = Field(..., description="Count of vague return reasons provided", example=1)
-    most_common_category: str = Field(..., description="Most frequent product category purchased", example="Clothing")
-    mismatch_flag_history: bool = Field(..., description="Whether customer has history of wrong item claims", example=False)
+class ReturnRequest(BaseModel):
+    customer_id: str = Field(..., description="Unique customer identifier", example="CUST000063")
+    order_id: Optional[str] = Field(None, description="Order identifier", example="ORD00007551")
+    product_category: Optional[str] = Field("Electronics", description="Category of purchased item", example="Electronics")
+    return_reason: Optional[str] = Field("Changed mind", description="Customer provided return reason", example="Defective")
+    is_returned: bool = Field(True, description="Whether this request is a return event")
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "total_orders": 8,
-                "return_ratio": 0.35,
-                "avg_return_window": 3.0,
-                "vague_reason_count": 2,
-                "most_common_category": "Clothing",
-                "mismatch_flag_history": True
-            }
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "customer_id": "CUST000063",
+            "order_id": "ORD00007551",
+            "product_category": "Clothing",
+            "return_reason": "Defective",
+            "is_returned": True
         }
-    )
+    })
 
 
 class RiskPredictionResponse(BaseModel):
-    risk_score: float = Field(..., description="Predicted return risk score (0 - 100)")
-    risk_level: str = Field(..., description="Risk category: Low, Medium, High")
-    recommendation: str = Field(..., description="Suggested action based on risk level")
+    customer_id: str
+    risk_score: float = Field(..., description="Customer return risk score from 0 to 100")
+    risk_level: str = Field(..., description="Risk tier: Low, Medium, High")
+    risk_probability: float = Field(..., description="Probability score between 0.0 and 1.0")
+    prediction_method: str = Field(..., description="Method used: ml_model, new_customer_baseline, or rule_based_fallback")
+    model_version: str = Field(..., description="Trained model version identifier")
+    recommendation: str = Field(..., description="Actionable recommendation for merchant")
+    customer_history: Dict[str, Any] = Field(..., description="Historical customer features from database")
 
 
-def determine_risk_level(score: float) -> str:
-    if score <= 40:
-        return "Low"
-    elif score <= 70:
-        return "Medium"
-    else:
-        return "High"
-
-
-def get_recommendation(risk_level: str) -> str:
-    if risk_level == "Low":
-        return "Standard processing - Low risk customer"
-    elif risk_level == "Medium":
-        return "Monitor returns - Require specific return reasons"
-    else:
-        return "High risk - Require manual verification for return authorization"
+class NewCustomerResponse(BaseModel):
+    customer_id: str
+    risk_score: float
+    risk_level: str
+    prediction_method: str
+    message: str
+    recommendation: str
 
 
 @app.get("/")
 def read_root():
     return {
         "status": "online",
-        "service": "E-Commerce Return Risk Prediction API",
+        "service": "Customer Return Risk Analyzer API",
+        "version": "3.0.0",
         "docs_url": "/docs"
     }
 
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "model_loaded": model is not None}
+    return {
+        "status": "healthy",
+        "model_loaded": risk_model.model is not None,
+        "model_version": risk_model.version,
+        "total_customers_in_db": len(risk_model.customer_db)
+    }
+
+
+@app.get("/model/metrics")
+def get_model_metrics():
+    """Returns model performance metrics and cross-validation evaluation."""
+    if risk_model.model is None:
+        raise HTTPException(status_code=500, detail="Model not initialized")
+    return {
+        "version": risk_model.version,
+        "metrics": risk_model.metrics,
+        "cv_results": risk_model.cv_results,
+        "total_customers": len(risk_model.customer_db)
+    }
 
 
 @app.post("/predict", response_model=RiskPredictionResponse)
-def predict_risk(data: CustomerFeatureInput):
-    global model
-    if model is None:
-        load_model_binary()
-        if model is None:
-            raise HTTPException(status_code=500, detail="ML model binary not found. Train model first.")
+def predict_customer_risk(request: ReturnRequest):
+    """
+    Predicts risk score (0–100) and risk level (Low, Medium, High) for a customer's return request.
+    Fetches historical features from database if existing, or uses sensible default baselines for new customers.
+    """
+    if risk_model.model is None:
+        load_or_train_model()
 
-    input_df = pd.DataFrame([{
-        'total_orders': data.total_orders,
-        'return_ratio': data.return_ratio,
-        'avg_return_window': data.avg_return_window,
-        'vague_reason_count': data.vague_reason_count,
-        'most_common_category': data.most_common_category,
-        'mismatch_flag_history': int(data.mismatch_flag_history)
-    }])
+    customer_features = risk_model.get_customer_features(request.customer_id)
 
-    raw_prediction = model.predict(input_df)[0]
-    risk_score = round(float(max(0.0, min(100.0, raw_prediction))), 2)
-    risk_level = determine_risk_level(risk_score)
-    recommendation = get_recommendation(risk_level)
+    if customer_features is None:
+        # Handling new customer flow
+        default_features = risk_model.get_default_features(request.customer_id)
+        prediction = risk_model.predict_risk(default_features)
+        prediction['prediction_method'] = 'new_customer_baseline'
+        
+        # Initialize/collect history for future predictions
+        updated_features = risk_model.update_customer_history(request.customer_id, request.model_dump())
+
+        return RiskPredictionResponse(
+            customer_id=request.customer_id,
+            risk_score=prediction['risk_score'],
+            risk_level=prediction['risk_level'],
+            risk_probability=prediction['risk_probability'],
+            prediction_method=prediction['prediction_method'],
+            model_version=prediction['model_version'],
+            recommendation="New customer - Standard processing. Transaction recorded for future history.",
+            customer_history=updated_features
+        )
+
+    # Existing customer prediction flow
+    prediction = risk_model.predict_risk(customer_features)
+    
+    # Update customer history after prediction for continuous history building
+    updated_features = risk_model.update_customer_history(request.customer_id, request.model_dump())
 
     return RiskPredictionResponse(
-        risk_score=risk_score,
-        risk_level=risk_level,
-        recommendation=recommendation
+        customer_id=request.customer_id,
+        risk_score=prediction['risk_score'],
+        risk_level=prediction['risk_level'],
+        risk_probability=prediction['risk_probability'],
+        prediction_method=prediction['prediction_method'],
+        model_version=prediction['model_version'],
+        recommendation=prediction['recommendation'],
+        customer_history=customer_features
     )
+
+
+@app.post("/predict-new-customer", response_model=NewCustomerResponse)
+def predict_new_customer(request: ReturnRequest):
+    """Explicit endpoint to handle brand-new customer return requests and initialize history."""
+    default_features = risk_model.get_default_features(request.customer_id)
+    prediction = risk_model.predict_risk(default_features)
+    
+    # Register customer and collect history
+    risk_model.update_customer_history(request.customer_id, request.model_dump())
+
+    return NewCustomerResponse(
+        customer_id=request.customer_id,
+        risk_score=prediction['risk_score'],
+        risk_level=prediction['risk_level'],
+        prediction_method='new_customer_default',
+        message="New customer record created. Default features applied for initial score.",
+        recommendation="Apply standard return policy. Starting customer history collection."
+    )
+
+
+@app.post("/update-history")
+def update_history(request: ReturnRequest):
+    """Updates customer transaction and return history in the database."""
+    updated_features = risk_model.update_customer_history(request.customer_id, request.model_dump())
+    return {
+        "status": "success",
+        "customer_id": request.customer_id,
+        "message": "Customer history updated successfully",
+        "current_total_orders": updated_features.get('total_orders'),
+        "current_return_ratio": updated_features.get('return_ratio')
+    }
+
+
+@app.get("/customer/{customer_id}")
+def get_customer_profile(customer_id: str):
+    """Lookup customer profile and current risk score evaluation."""
+    features = risk_model.get_customer_features(customer_id)
+    if features is None:
+        return {
+            "customer_id": customer_id,
+            "status": "new_customer",
+            "features": risk_model.get_default_features(customer_id),
+            "risk_assessment": risk_model.predict_risk(risk_model.get_default_features(customer_id))
+        }
+
+    prediction = risk_model.predict_risk(features)
+    return {
+        "customer_id": customer_id,
+        "status": "existing_customer",
+        "features": features,
+        "risk_assessment": prediction
+    }
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-    

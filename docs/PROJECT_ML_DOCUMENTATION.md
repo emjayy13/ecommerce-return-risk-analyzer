@@ -6,14 +6,17 @@
 ## 📌 Table of Contents
 1. [🚀 Executive Overview & Real-World Problem Statement](#-executive-overview--real-world-problem-statement)
 2. [💡 Core Innovation: Zero Data Leakage Architecture](#-core-innovation-zero-data-leakage-architecture)
-3. [🏗️ End-to-End Architecture & Workflow Diagram](#️-end-to-end-architecture--workflow-diagram)
-4. [📁 Comprehensive File-by-File Guide](#-comprehensive-file-by-file-guide)
-5. [📊 Feature Engineering & Customer Profiling](#-feature-engineering--customer-profiling)
-6. [🔬 Machine Learning Algorithms & Preprocessing](#-machine-learning-algorithms--preprocessing)
-7. [📈 Performance Evaluation & Live Testing Metrics](#-performance-evaluation--live-testing-metrics)
-8. [🔄 Continuous Learning v2 Engine (Feedback & Retraining)](#-continuous-learning-v2-engine-feedback--retraining)
-9. [🌐 FastAPI REST API Reference](#-fastapi-rest-api-reference)
-10. 🥊 [Interviewer Cross-Questioning Master Class (12 Deep-Dive Q&As)](#-interviewer-cross-questioning-master-class-12-deep-dive-qas)
+3. [📊 End-to-End Visual Architecture & Mermaid Flowcharts](#-end-to-end-visual-architecture--mermaid-flowcharts)
+   - [Diagram 1: End-to-End Data Pipeline & ML Workflow](#diagram-1-end-to-end-data-pipeline--ml-workflow)
+   - [Diagram 2: Real-Time Prediction Lifecycle & Risk Scoring](#diagram-2-real-time-prediction-lifecycle--risk-scoring)
+   - [Diagram 3: Continuous Learning v2 & Champion vs. Challenger Engine](#diagram-3-continuous-learning-v2--champion-vs-challenger-engine)
+4. [📁 Comprehensive File-by-File Technical Guide](#-comprehensive-file-by-file-technical-guide)
+5. [📊 Feature Engineering & Customer Risk Profiling](#-feature-engineering--customer-risk-profiling)
+6. [🔬 Machine Learning Mathematics, Preprocessing & Classifiers](#-machine-learning-mathematics-preprocessing--classifiers)
+7. [📈 Performance Evaluation & Live 20-Request Batch Results](#-performance-evaluation--live-20-request-batch-results)
+8. [🔄 Continuous Learning v2 Engine (Feedback & Gatekeeper)](#-continuous-learning-v2-engine-feedback--gatekeeper)
+9. [🌐 FastAPI REST API Endpoint Reference](#-fastapi-rest-api-endpoint-reference)
+10. 🥊 [Interviewer Cross-Questioning Master Class (15 Deep-Dive Q&As)](#-interviewer-cross-questioning-master-class-15-deep-dive-qas)
 
 ---
 
@@ -51,51 +54,86 @@ The ML model must actually learn the complex non-linear statistical relationship
 
 ---
 
-## 🏗️ End-to-End Architecture & Workflow Diagram
+## 📊 End-to-End Visual Architecture & Mermaid Flowcharts
 
-```
-+-----------------------------------------------------------------------------------+
-|                               RAW DATA PREPROCESSING                              |
-|   raw_data.csv  -->  [ preprocess.py ]  -->  ecommerce_returns_clean.csv          |
-+-----------------------------------------------------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-|                           CUSTOMER ENTITY SIMULATION                              |
-|   clean_data.csv  -->  [ simulate_customers.py ]  -->  Independent Ground-Truth  |
-|                                                       Target (flagged_by_company) |
-+-----------------------------------------------------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-|                               FEATURE AGGREGATION                                 |
-|   simulated_data.csv  -->  [ aggregate_features.py ]  -->  customer_features.csv   |
-|                            (10 Historical Features)                               |
-+-----------------------------------------------------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-|                        MODEL TRAINING & CROSS VALIDATION                          |
-|   customer_features.csv  -->  [ train.py / customer_risk_model.py ]                |
-|                               (StandardScaler, OneHotEncoder, 5-Fold Stratified CV)|
-+-----------------------------------------------------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-|                           PRODUCTION ARTIFACT EXPORT                              |
-|   models/customer_risk_model.pkl  &  models/customer_risk_metadata.json          |
-+-----------------------------------------------------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-|                           FASTAPI REST SERVING API                                |
-|   [ predict.py ]  <-- POST /predict, POST /feedback, POST /retrain, GET /metrics  |
-+-----------------------------------------------------------------------------------+
+### Diagram 1: End-to-End Data Pipeline & ML Workflow
+
+```mermaid
+flowchart TD
+    A["Raw Order Dataset (ecommerce_returns_synthetic_data.csv)"] --> B["Data Preprocessing (preprocess.py)"]
+    B -->|"Filter Outliers (>90d, negative dates)"| C["Clean Order Dataset (ecommerce_returns_clean.csv)"]
+    C --> D["Customer Simulation Layer (simulate_customers.py)"]
+    D -->|"Assign Independent Audit Label (flagged_by_company)"| E["Simulated Customer Orders (ecommerce_returns_simulated_customers.csv)"]
+    E --> F["Feature Aggregation (aggregate_features.py)"]
+    F -->|"10 Historical Customer Features"| G["Customer Feature Table (customer_features.csv)"]
+    G --> H["Model Training & Cross-Validation (customer_risk_model.py)"]
+    H -->|"StandardScaler + OneHotEncoder"| I["5-Fold Stratified Cross-Validation"]
+    I -->|"Select Best Candidate Model"| J["Model Serialization (customer_risk_model.pkl & metadata.json)"]
+    J --> K["Production FastAPI REST API (predict.py)"]
 ```
 
 ---
 
-## 📁 Comprehensive File-by-File Guide
+### Diagram 2: Real-Time Prediction Lifecycle & Risk Scoring
+
+```mermaid
+flowchart TD
+    Req["Incoming Return Request (POST /predict)"] --> Lookup{"Customer ID in Database?"}
+    
+    Lookup -- "Yes (Existing Customer)" --> Features["Fetch Historical Features (total_orders, return_ratio, vague_reasons...)"]
+    Lookup -- "No (Brand-New Customer)" --> Defaults["Assign Default Baseline Features (total_orders=0, ratio=0.0)"]
+    
+    Features --> Trans["Apply Preprocessor (StandardScaler + OneHotEncoder)"]
+    Defaults --> Trans
+    
+    Trans --> Model["Production Classifier (Logistic Regression / Random Forest)"]
+    Model --> Prob["Output Predicted Fraud Probability: p in [0, 1]"]
+    
+    Prob --> Score["Calculate Risk Score: Score = round(p * 100, 2)"]
+    
+    Score --> Buckets{"Evaluate Risk Tier"}
+    
+    Buckets -- "Score < 35" --> Low["Low Risk: Instant Return Approval"]
+    Buckets -- "Score 35 to 69" --> Med["Medium Risk: Require Item Verification"]
+    Buckets -- "Score >= 70" --> High["High Risk: Route to Fraud Mitigation Team"]
+    
+    Low --> Resp["Return JSON Response + Update Customer DB History"]
+    Med --> Resp
+    High --> Resp
+```
+
+---
+
+### Diagram 3: Continuous Learning v2 & Champion vs. Challenger Engine
+
+```mermaid
+flowchart TD
+    Audit["Manual Fraud Audit / Merchant Inspection"] --> Submit["Submit Verified Audit Outcome (POST /feedback)"]
+    Submit --> Store["Append Labeled Entry to feedback_records.csv"]
+    Store --> Count{"Unprocessed Feedback Count >= 10?"}
+    
+    Count -- "No (< 10)" --> Wait["Wait for More Feedback Items"]
+    Count -- "Yes (>= 10)" --> Trigger["Auto-Trigger Continuous Retraining Pipeline"]
+    
+    Trigger --> Combine["Merge Base Dataset + Verified Feedback Records"]
+    Combine --> Preproc["Run Data Preprocessing & Feature Engineering"]
+    Preproc --> TrainCV["Train Candidate Models via 5-Fold Stratified CV"]
+    
+    TrainCV --> PickBest["Select Top Candidate as 'Challenger Model'"]
+    PickBest --> Compare{"Challenger ROC-AUC >= Production Champion ROC-AUC?"}
+    
+    Compare -- "Yes (Superior / Equal)" --> Promote["PROMOTE Challenger to Production (customer_risk_model.pkl)"]
+    Compare -- "No (Inferior)" --> Reject["REJECT Challenger (Retain Active Champion)"]
+    
+    Promote --> Archive["Archive Version Binary (models/versions/model_vN.pkl)"]
+    Reject --> Archive
+    
+    Archive --> AuditLog["Log Entry to retraining_history.json & Reset Counter to 0"]
+```
+
+---
+
+## 📁 Comprehensive File-by-File Technical Guide
 
 | File Path | Primary Responsibility | Key Output / Output Artifact |
 | :--- | :--- | :--- |
@@ -112,7 +150,7 @@ The ML model must actually learn the complex non-linear statistical relationship
 
 ---
 
-## 📊 Feature Engineering & Customer Profiling
+## 📊 Feature Engineering & Customer Risk Profiling
 
 The model relies on 10 aggregated customer-level features ($X$) that reflect long-term customer behavioral patterns:
 
@@ -129,16 +167,18 @@ The model relies on 10 aggregated customer-level features ($X$) that reflect lon
 
 ---
 
-## 🔬 Machine Learning Algorithms & Preprocessing
+## 🔬 Machine Learning Mathematics, Preprocessing & Classifiers
 
 ### 1. Data Preprocessing Pipeline
 We use scikit-learn's `ColumnTransformer` to enforce clean data transformation:
-- **Numerical Features**: Scaled using `StandardScaler()` ($\mu = 0, \sigma = 1$) to standardize feature scales.
+- **Numerical Features**: Scaled using `StandardScaler()` ($\mu = 0, \sigma = 1$) to standardize feature scales:
+  $$z = \frac{x - \mu}{\sigma}$$
 - **Categorical Features**: Encoded using `OneHotEncoder(handle_unknown='ignore', sparse_output=False)` to prevent out-of-vocabulary errors during real-world serving.
 
 ### 2. Candidate Machine Learning Classifiers
 We train and evaluate three distinct model families:
-1. **Logistic Regression (L2 Regularized)**: Serves as a strong linear baseline, highly interpretable, calibrated probabilities.
+1. **Logistic Regression (L2 Regularized)**: Serves as a strong linear baseline, highly interpretable, calibrated probabilities using the sigmoid activation:
+   $$\sigma(z) = \frac{1}{1 + e^{-z}}$$
 2. **Random Forest Classifier**: Non-linear ensemble model using 200 decision trees (`max_depth=6`, `class_weight='balanced'`).
 3. **Gradient Boosting Classifier**: Sequential boosting tree ensemble (`n_estimators=150`, `learning_rate=0.05`).
 
@@ -148,7 +188,7 @@ We train and evaluate three distinct model families:
 
 ---
 
-## 📈 Performance Evaluation & Live Testing Metrics
+## 📈 Performance Evaluation & Live 20-Request Batch Results
 
 ### 1. Holdout Test Evaluation Results
 
@@ -168,28 +208,7 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 
 ---
 
-## 🔄 Continuous Learning v2 Engine (Feedback & Retraining)
-
-```
-[ Customer Return Request ] --> Predict Risk Score --> Return Authorization
-                                                               |
-                                                               v
-[ Manual Audit / Merchant Inspection ] --> Submit Ground-Truth Outcome Label (POST /feedback)
-                                                               |
-                                                               v
-[ Feedback Store ] --> Accumulate Records (Unprocessed Count >= 10)
-                                                               |
-                                                               v
-[ Auto-Retrain Pipeline ] --> Train Candidate "Challenger" Models (5-Fold CV)
-                                                               |
-                                                               v
-                                     Is Challenger ROC-AUC >= Champion ROC-AUC?
-                                           /                        \
-                                     YES  /                          \  NO
-                                         v                            v
-                            [ PROMOTE Challenger ]           [ REJECT Challenger ]
-                            (Save model_vN.pkl)              (Keep Active Champion)
-```
+## 🔄 Continuous Learning v2 Engine (Feedback & Gatekeeper)
 
 ### Key Components of Continuous Learning v2:
 1. **Feedback Ingestion (`POST /feedback`)**: Receives verified audit outcomes (`actual_fraud_label`: 1 or 0) and appends to `ml/data/feedback_records.csv`.
@@ -199,7 +218,7 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 
 ---
 
-## 🌐 FastAPI REST API Reference
+## 🌐 FastAPI REST API Endpoint Reference
 
 | Method | Endpoint | Description | Sample Payload / Params |
 | :---: | :--- | :--- | :--- |
@@ -214,7 +233,7 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 
 ---
 
-## 🥊 Interviewer Cross-Questioning Master Class (12 Deep-Dive Q&As)
+## 🥊 Interviewer Cross-Questioning Master Class (15 Deep-Dive Q&As)
 
 ### Q1: Why did you build a Customer Risk Model instead of an Order Return Prediction Model?
 > **Answer**: Predicting whether a single order will be returned is an order classification task that doesn't capture customer intent. A customer returning an ill-fitting shoe is normal shopping behavior, whereas a customer making 10 suspicious "wrong item" claims across high-risk electronics is return abuse. By building a **Customer Return Risk Analyzer**, we quantify long-term customer abuse risk, enabling merchants to protect profit margins while maintaining smooth return experiences for honest customers.
@@ -228,7 +247,7 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 ---
 
 ### Q3: Why did you select Logistic Regression as your Champion model over Random Forest or Gradient Boosting?
-> **Answer**: We evaluated all candidate models using 5-Fold Stratified Cross-Validation. Logistic Regression achieved the highest **ROC-AUC (0.9799)** and **100% Recall on fraud cases** on the holdout test set, outperforming Gradient Boosting (0.9775) and Random Forest (0.9514). Additionally, Logistic Regression provides well-calibrated prediction probabilities $P(Y=1 | X)$, making it ideal for scaling probabilities into a continuous 0–100 Risk Score.
+> **Answer**: We evaluated all candidate models using 5-Fold Stratified Cross-Validation. Logistic Regression achieved the highest **ROC-AUC (0.9799)** and **100% Recall on fraud cases** on the holdout test set, outperforming Gradient Boosting (0.9775) and Random Forest (0.9514). Additionally, Logistic Regression provides well-calibrated prediction probabilities $P(Y=1 \mid X)$, making it ideal for scaling probabilities into a continuous 0–100 Risk Score.
 
 ---
 
@@ -285,3 +304,20 @@ In a live simulated batch test ([test_20_requests.py](file:///c:/Users/mohit/Des
 > 1. **Population Stability Index (PSI)**: Detects shifts in input feature distributions over time.
 > 2. **Prediction Risk Level Distribution**: Tracks changes in the ratio of Low vs High Risk predictions.
 > 3. **Feedback False Positive Rate (FPR)**: Monitors manual audit feedback to identify rising false alarm rates, triggering hyperparameter tuning or feature re-engineering when drift occurs.
+
+---
+
+### Q13: How do you deal with Class Imbalance in your training dataset?
+> **Answer**: In our customer dataset, fraudulent/high-risk customers represent ~15% of the overall customer base (class ratio ~1:6). We handle class imbalance using two strategies:
+> 1. **Class Weighting (`class_weight='balanced'`)**: Adjusts weights inversely proportional to class frequencies during model fitting, penalizing false negatives on the minority fraud class.
+> 2. **Stratified Splitting (`StratifiedKFold`)**: Enforces exact class proportion preservation across all 5 cross-validation folds and holdout train/test splits.
+
+---
+
+### Q14: What is the difference between Batch Retraining and Real-Time Online Learning?
+> **Answer**: Real-time online learning updates model weights continuously per sample (e.g., Stochastic Gradient Descent). However, online learning is highly sensitive to catastrophic forgetting and noise. Our **Threshold-Based Batch Retraining** combines the stability of batch training with the adaptability of continuous learning, ensuring candidate models are rigorously cross-validated before replacing production binaries.
+
+---
+
+### Q15: How does your system support seamless rollback if a promoted model shows unexpected behavior in production?
+> **Answer**: Every model version binary is immutably archived in `ml/models/versions/model_vN.pkl` alongside metadata logs. If an operational anomaly occurs, an operator can invoke a rollback by overwriting `ml/models/customer_risk_model.pkl` with a prior known good version file from the `versions/` folder and calling `load_model()` via the API.

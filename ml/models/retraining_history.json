@@ -1,0 +1,58 @@
+[
+  {
+    "timestamp": "2026-07-31T23:14:05.980583",
+    "reason": "Threshold reached",
+    "dataset_size": 1368,
+    "unprocessed_feedback_processed": 10,
+    "champion_version": "v3_LogisticRegression_20260731_225628",
+    "champion_roc_auc": 0.9799,
+    "challenger_version": "v2_LogisticRegression_20260731_231405",
+    "challenger_model_name": "LogisticRegression",
+    "challenger_roc_auc": 0.9762,
+    "challenger_f1": 0.7191,
+    "challenger_accuracy": 0.9088,
+    "status": "REJECTED"
+  },
+  {
+    "timestamp": "2026-07-31T23:14:09.745461",
+    "reason": "Triggered via POST /retrain",
+    "dataset_size": 1368,
+    "unprocessed_feedback_processed": 0,
+    "champion_version": "v3_LogisticRegression_20260731_225628",
+    "champion_roc_auc": 0.9799,
+    "challenger_version": "v2_LogisticRegression_20260731_231409",
+    "challenger_model_name": "LogisticRegression",
+    "challenger_roc_auc": 0.9762,
+    "challenger_f1": 0.7191,
+    "challenger_accuracy": 0.9088,
+    "status": "PROMOTED"
+  },
+  {
+    "timestamp": "2026-07-31T23:15:42.446421",
+    "reason": "Threshold reached",
+    "dataset_size": 1368,
+    "unprocessed_feedback_processed": 10,
+    "champion_version": "v2_LogisticRegression_20260731_231409",
+    "champion_roc_auc": 0.9762,
+    "challenger_version": "v2_LogisticRegression_20260731_231542",
+    "challenger_model_name": "LogisticRegression",
+    "challenger_roc_auc": 0.9762,
+    "challenger_f1": 0.7191,
+    "challenger_accuracy": 0.9088,
+    "status": "PROMOTED"
+  },
+  {
+    "timestamp": "2026-07-31T23:15:46.258943",
+    "reason": "Triggered via POST /retrain",
+    "dataset_size": 1368,
+    "unprocessed_feedback_processed": 0,
+    "champion_version": "v2_LogisticRegression_20260731_231542",
+    "champion_roc_auc": 0.9762,
+    "challenger_version": "v2_LogisticRegression_20260731_231546",
+    "challenger_model_name": "LogisticRegression",
+    "challenger_roc_auc": 0.9762,
+    "challenger_f1": 0.7191,
+    "challenger_accuracy": 0.9088,
+    "status": "PROMOTED"
+  }
+]

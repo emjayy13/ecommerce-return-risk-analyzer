@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ML data files (regenerate via scripts instead of committing)
+ml/data/*.csv
+ml/data/*.zip
+
+# ML model binary files (regenerate via training scripts)
+ml/models/*.pkl
+ml/models/versions/*.pkl

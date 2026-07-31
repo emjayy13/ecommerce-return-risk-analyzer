@@ -1,0 +1,43 @@
+{
+  "version": "v2_LogisticRegression_20260731_231546",
+  "updated_at": "2026-07-31T23:15:46.364635",
+  "metrics": {
+    "best_model_name": "LogisticRegression",
+    "accuracy": 0.9088,
+    "precision": 0.5714,
+    "recall": 0.9697,
+    "f1_score": 0.7191,
+    "roc_auc": 0.9762,
+    "pr_auc": 0.8656,
+    "cv_scores": {
+      "mean_accuracy": 0.9123,
+      "mean_roc_auc": 0.9689
+    }
+  },
+  "cv_results": {
+    "RandomForest": {
+      "mean_accuracy": 0.9107,
+      "mean_precision": 0.5791,
+      "mean_recall": 0.9538,
+      "mean_f1": 0.7196,
+      "mean_roc_auc": 0.9641
+    },
+    "GradientBoosting": {
+      "mean_accuracy": 0.93,
+      "mean_precision": 0.7636,
+      "mean_recall": 0.6154,
+      "mean_f1": 0.6736,
+      "mean_roc_auc": 0.9737
+    },
+    "LogisticRegression": {
+      "mean_accuracy": 0.9125,
+      "mean_precision": 0.5789,
+      "mean_recall": 1.0,
+      "mean_f1": 0.733,
+      "mean_roc_auc": 0.9706
+    }
+  },
+  "total_customers_in_db": 1368,
+  "unprocessed_feedback_count": 0,
+  "retrain_threshold": 10
+}

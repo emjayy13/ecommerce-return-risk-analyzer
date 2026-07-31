@@ -37,6 +37,21 @@ header p:first-child {
   text-transform: uppercase;
 }
 
+.dashboard-status {
+  padding: 14px 18px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.dashboard-status__error {
+  color: #b42318;
+}
+
 h1 {
   margin: 0 0 12px;
   color: #172033;

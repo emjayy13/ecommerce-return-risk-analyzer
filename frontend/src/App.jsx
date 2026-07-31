@@ -91,56 +91,85 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [minimumReturnRatio, setMinimumReturnRatio] = useState(0)
   const [selectedCustomer, setSelectedCustomer] = useState(null)
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true)
+  const [dashboardError, setDashboardError] = useState('')
+  const [isLoadingCustomers, setIsLoadingCustomers] = useState(false)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false)
+  const [interactionError, setInteractionError] = useState('')
 
   useEffect(() => {
     async function loadOverallDashboardData() {
-      const [customerData, summaryData, categoryData, trendData] =
-        await Promise.all([
-          getCustomers(),
-          getDashboardSummary(),
-          getCategoryStats(),
-          getReturnTrends(),
-        ])
+      try {
+        setIsLoadingDashboard(true)
+        setDashboardError('')
 
-      setAllCustomers(customerData.map(normalizeCustomer))
-      setSummary(summaryData)
-      setCategoryReturnData(
-        categoryData.map((item) => ({
-          category: item.category,
-          returns: item.count,
-        })),
-      )
-      setReturnTrendData(trendData)
+        const [customerData, summaryData, categoryData, trendData] =
+          await Promise.all([
+            getCustomers(),
+            getDashboardSummary(),
+            getCategoryStats(),
+            getReturnTrends(),
+          ])
+
+        setAllCustomers(customerData.map(normalizeCustomer))
+        setSummary(summaryData)
+        setCategoryReturnData(
+          categoryData.map((item) => ({
+            category: item.category,
+            returns: item.count,
+          })),
+        )
+        setReturnTrendData(trendData)
+      } catch (error) {
+        setDashboardError(error.message || 'Unable to load dashboard data.')
+      } finally {
+        setIsLoadingDashboard(false)
+      }
     }
 
-    loadOverallDashboardData().catch((error) => {
-      console.error('Unable to load dashboard data:', error)
-    })
+    loadOverallDashboardData()
   }, [])
 
   useEffect(() => {
     async function loadFilteredCustomers() {
-      const customerData = await getCustomers({
-        risk: showHighRiskOnly ? 'High' : '',
-        category: selectedCategory === 'All' ? '' : selectedCategory,
-        returnRatio:
-          minimumReturnRatio > 0 ? minimumReturnRatio / 100 : '',
-      })
+      try {
+        setIsLoadingCustomers(true)
+        setInteractionError('')
 
-      setCustomers(customerData.map(normalizeCustomer))
+        const customerData = await getCustomers({
+          risk: showHighRiskOnly ? 'High' : '',
+          category: selectedCategory === 'All' ? '' : selectedCategory,
+          returnRatio:
+            minimumReturnRatio > 0 ? minimumReturnRatio / 100 : '',
+        })
+
+        setCustomers(customerData.map(normalizeCustomer))
+      } catch (error) {
+        setCustomers([])
+        setInteractionError(
+          error.message || 'Unable to load filtered customers.',
+        )
+      } finally {
+        setIsLoadingCustomers(false)
+      }
     }
 
-    loadFilteredCustomers().catch((error) => {
-      console.error('Unable to load filtered customers:', error)
-    })
+    loadFilteredCustomers()
   }, [showHighRiskOnly, selectedCategory, minimumReturnRatio])
 
   async function handleViewProfile(customer) {
     try {
+      setIsLoadingProfile(true)
+      setInteractionError('')
+
       const detail = await getCustomerById(customer.id)
       setSelectedCustomer(normalizeCustomerDetail(detail))
     } catch (error) {
-      console.error('Unable to load customer profile:', error)
+      setInteractionError(
+        error.message || 'Unable to load the customer profile.',
+      )
+    } finally {
+      setIsLoadingProfile(false)
     }
   }
 
@@ -170,6 +199,30 @@ function App() {
         <h1>Customer Return Risk Analyzer</h1>
         <p>Monitor customer return behaviour and identify potential risk.</p>
       </header>
+
+      {(isLoadingDashboard ||
+        isLoadingCustomers ||
+        isLoadingProfile ||
+        dashboardError ||
+        interactionError) && (
+        <div className="dashboard-status" aria-live="polite">
+          {isLoadingDashboard && <p>Loading dashboard data…</p>}
+          {!isLoadingDashboard && isLoadingCustomers && (
+            <p>Updating customer list…</p>
+          )}
+          {isLoadingProfile && <p>Loading customer profile…</p>}
+          {dashboardError && (
+            <p className="dashboard-status__error" role="alert">
+              {dashboardError}
+            </p>
+          )}
+          {interactionError && (
+            <p className="dashboard-status__error" role="alert">
+              {interactionError}
+            </p>
+          )}
+        </div>
+      )}
 
       <section aria-labelledby="overview-heading">
         <h2 id="overview-heading">Return Overview</h2>

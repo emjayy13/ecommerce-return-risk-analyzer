@@ -1,0 +1,79 @@
+{
+  "model_name": "LogisticRegression",
+  "version": "LogisticRegression_20260731_210148",
+  "timestamp": "20260731_210148",
+  "features": {
+    "numeric_features": [
+      "Product_Price",
+      "Order_Quantity",
+      "User_Age",
+      "Discount_Applied",
+      "Order_Month",
+      "Order_Day",
+      "Order_DayOfWeek",
+      "Total_Order_Value",
+      "Effective_Order_Value",
+      "Discount_Percentage",
+      "total_orders",
+      "return_ratio",
+      "avg_return_window",
+      "vague_reason_count",
+      "category_return_rate",
+      "category_avg_price",
+      "category_order_count",
+      "location_return_rate",
+      "location_order_count",
+      "payment_return_rate",
+      "payment_order_count",
+      "shipping_return_rate",
+      "shipping_order_count",
+      "price_percentile",
+      "quantity_percentile",
+      "discount_percentile",
+      "price_x_quantity",
+      "discount_ratio",
+      "price_deviation_from_category"
+    ],
+    "categorical_features": [
+      "Product_Category",
+      "User_Gender",
+      "Payment_Method",
+      "Shipping_Method"
+    ],
+    "boolean_features": [
+      "Is_Weekend",
+      "Is_Clothing_Category",
+      "High_Discount_Flag",
+      "Is_Express_Shipping",
+      "mismatch_flag_history"
+    ],
+    "total_features": 48
+  },
+  "metrics": {
+    "accuracy": 0.7764423076923077,
+    "precision": 0.29535864978902954,
+    "recall": 0.7865168539325843,
+    "f1": 0.4294478527607362,
+    "auc_roc": 0.8742722337320611,
+    "pr_auc": 0.45034696084210324,
+    "confusion_matrix": [
+      [
+        576,
+        167
+      ],
+      [
+        19,
+        70
+      ]
+    ],
+    "train_samples": 3862,
+    "val_samples": 848,
+    "test_samples": 832,
+    "ensemble_members": [
+      "LogisticRegression",
+      "GradientBoosting",
+      "XGBoost"
+    ]
+  },
+  "training_samples": 3862
+}

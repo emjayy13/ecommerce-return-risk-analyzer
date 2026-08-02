@@ -1,89 +1,184 @@
-# E-Commerce Customer Return Risk Analyzer - ML Subsystem (v2)
+# ML Subsystem - Customer Return Risk Analyzer
 
-This directory contains the Machine Learning module for predicting customer return risk scores (0-100) based on historical customer behavior and independent ground-truth audit labels.
-
-> **Full Master Technical & Interviewer Documentation**: See [docs/PROJECT_ML_DOCUMENTATION.md](file:///c:/Users/mohit/Desktop/ecommerce-return-risk-analyzer/docs/PROJECT_ML_DOCUMENTATION.md) for full pipeline details, metrics, and 12 interviewer Q&As.
+Predicts customer return risk scores (0-100) using scikit-learn with continuous learning.
 
 ---
 
-## Architecture Overview
+## Features
 
-```
+- Synthetic ecommerce data generation (5,400 orders, 10 categories)
+- Data preprocessing and cleaning
+- Customer-level feature engineering (10 numeric + 1 categorical)
+- Model training with 3 candidates (RandomForest, GradientBoosting, LogisticRegression)
+- Best model selection by ROC-AUC
+- FastAPI REST API with 11 endpoints
+- Feedback collection and automatic retraining (threshold: 10 items)
+- Champion vs. Challenger model promotion
+- Model versioning with archived versions
+
+---
+
+## Project Structure
+
+```text
 ml/
-├── data/                                 # Datasets (raw, cleaned, simulated, aggregated, feedback)
-│   ├── ecommerce_returns_synthetic_data.csv
-│   ├── ecommerce_returns_clean.csv
-│   ├── ecommerce_returns_simulated_customers.csv
-│   ├── customer_features.csv
-│   └── feedback_records.csv
-├── models/                               # Active production model & versions
-│   ├── customer_risk_model.pkl           # Active production model binary
-│   ├── customer_risk_metadata.json       # Production metrics metadata
-│   ├── retraining_history.json           # Continuous learning audit logs
-│   └── versions/                         # Archived versioned models (model_vN.pkl)
-├── src/                                  # ML Pipeline Source Code
-│   ├── preprocess.py                     # Data cleaning & anomaly removal
-│   ├── simulate_customers.py             # Customer-level grouping & independent ground-truth target
-│   ├── aggregate_features.py            # Feature engineering (10 historical customer metrics)
-│   ├── customer_risk_model.py            # Core ML Engine, preprocessor, and champion/challenger evaluator
-│   ├── train.py                          # Full pipeline execution & baseline model exporter
-│   ├── continuous_pipeline.py            # Retraining orchestrator
-│   ├── predict.py                        # FastAPI REST Serving API (Continuous Learning v2)
-│   └── debug/                            # Test & evaluation scripts
-│       ├── test_live_api.py
-│       ├── test_continuous_learning.py
-│       └── test_20_requests.py
-├── requirements.txt                      # Python dependencies
-└── README.md                             # ML Module Overview
+├── src/
+│   ├── generate_data.py           # Synthetic data generation
+│   ├── preprocess.py              # Data cleaning & feature engineering
+│   ├── simulate_customers.py      # Customer profile simulation
+│   ├── aggregate_features.py      # Customer-level feature aggregation
+│   ├── customer_risk_model.py     # Core ML engine (train, predict, retrain)
+│   ├── train.py                   # Pipeline orchestrator
+│   ├── predict.py                 # FastAPI REST API
+│   ├── continuous_pipeline.py     # Standalone retraining script
+│   └── debug/                     # Test & evaluation scripts
+├── data/                          # Generated after training (not in repo)
+├── models/                        # Generated after training (not in repo)
+│   └── versions/                  # Archived model versions
+├── notebooks/                     # Jupyter notebooks (EDA)
+└── requirements.txt
 ```
 
 ---
 
-## ML Pipeline & Continuous Learning Steps
+## Quick Start
 
-1. **Preprocessing (`src/preprocess.py`)**:
-   - Cleans raw synthetic e-commerce return data.
-   - Handles missing values, filters negative return durations and >90 day outliers.
+Install dependencies:
 
-2. **Customer Simulation & Ground-Truth (`src/simulate_customers.py`)**:
-   - Maps raw orders to customer IDs (~1,350+ unique customer profiles).
-   - Assigns independent ground-truth target `flagged_by_company` (No Data Leakage!).
+```bash
+pip install -r requirements.txt
+```
 
-3. **Feature Aggregation (`src/aggregate_features.py`)**:
-   - Aggregates 10 historical customer features per customer: `total_orders`, `total_returns`, `return_ratio`, `avg_return_window`, `product_category_risk`, `vague_reason_count`, `mismatch_flag_history`, `customer_rating_behavior`, `previous_fraud_flags`, `account_age_days`.
+Train the complete pipeline:
 
-4. **Model Training & Cross-Validation (`src/customer_risk_model.py` & `src/train.py`)**:
-   - Preprocessing using `StandardScaler` for numeric and `OneHotEncoder` for categorical features.
-   - Evaluates `LogisticRegression` (Champion), `RandomForestClassifier`, and `GradientBoostingClassifier` using **5-Fold Stratified Cross-Validation**.
+```bash
+python src/train.py
+```
 
-5. **Continuous Learning v2 (`src/predict.py`)**:
-   - `POST /predict`: Generates Risk Score (0-100) and Level (Low, Medium, High).
-   - `POST /feedback`: Ingests verified audit ground-truth labels.
-   - Auto-triggers threshold retraining every 10 feedback items.
-   - **Champion vs. Challenger Gatekeeper**: Replaces production model only if the new Challenger model demonstrates superior ROC-AUC / F1 performance.
+Start the API:
+
+```bash
+python src/predict.py
+```
+
+API Documentation:
+
+```text
+http://localhost:8000/docs
+```
 
 ---
 
-## Running API & Tests
+## ML Pipeline
 
-### Install Dependencies
-```bash
-pip install -r ml/requirements.txt
+```text
+Generate Data (5,400 orders)
+        │
+        ▼
+Preprocess Data (clean, engineer features)
+        │
+        ▼
+Simulate Customers (~1,350 profiles)
+        │
+        ▼
+Aggregate Features (10 numeric + 1 categorical)
+        │
+        ▼
+Train Model (3 candidates, best by ROC-AUC)
+        │
+        ▼
+Serve Predictions (FastAPI)
 ```
 
-### Run Model Training Pipeline
-```bash
-python ml/src/train.py
+---
+
+## Model
+
+Trains 3 candidate models and selects the best by ROC-AUC:
+
+| Model | Parameters |
+|-------|-----------|
+| RandomForestClassifier | 200 trees, max_depth=6, balanced |
+| GradientBoostingClassifier | 150 trees, lr=0.05, max_depth=3 |
+| LogisticRegression | max_iter=1000, balanced, C=1.0 |
+
+Evaluation: 80/20 stratified split + 5-Fold Stratified Cross-Validation.
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Service status |
+| GET | `/health` | Health check with model stats |
+| GET | `/model/info` | Active model version and metrics |
+| GET | `/model/metrics` | Detailed CV metrics breakdown |
+| POST | `/predict` | Predict customer return risk (0-100) |
+| POST | `/predict-new-customer` | Predict for new customers |
+| POST | `/feedback` | Submit verified audit ground-truth label |
+| POST | `/retrain` | Manually trigger model retraining |
+| GET | `/retrain/history` | Retraining audit log |
+| POST | `/update-history` | Update customer transaction history |
+| GET | `/customer/{id}` | Customer profile lookup |
+
+---
+
+## Continuous Learning
+
+1. Submit feedback via `POST /feedback`
+2. Every 10 feedback items triggers automatic retraining
+3. New model promoted only if it outperforms current model (ROC-AUC)
+4. All model versions archived in `ml/models/versions/`
+
+---
+
+## Generated Files
+
+Generated automatically by `python src/train.py` and excluded from Git:
+
+```text
+ml/data/
+├── ecommerce_returns_synthetic_data.csv
+├── ecommerce_returns_clean.csv
+├── ecommerce_returns_simulated_customers.csv
+├── customer_features.csv
+└── feedback_records.csv
+
+ml/models/
+├── customer_risk_model.pkl
+├── customer_risk_metadata.json
+├── retraining_history.json
+└── versions/
 ```
 
-### Run Live Batch 20-Request Test & Metrics Evaluation
+To regenerate:
+
 ```bash
-python ml/src/debug/test_20_requests.py
+python src/train.py
 ```
 
-### Launch FastAPI Server
+---
+
+## Useful Commands
+
 ```bash
-cd ml/src
-python predict.py
+# Verify model exists
+python -c "import os; print(os.path.exists('models/customer_risk_model.pkl'))"
+
+# Check customer count
+python -c "import joblib; d=joblib.load('models/customer_risk_model.pkl'); print(len(d['customer_db']))"
+
+# View model metadata
+python -c "import json; print(json.dumps(json.load(open('models/customer_risk_metadata.json')), indent=2))"
 ```
-*Access Swagger UI documentation at: `http://localhost:8000/docs`*
+
+---
+
+## Future Improvements
+
+- Dockerfile for containerized deployment
+- Environment variable configuration
+- pytest integration with CI/CD
+- MongoDB for persistent customer database
+- React dashboard for analytics visualization

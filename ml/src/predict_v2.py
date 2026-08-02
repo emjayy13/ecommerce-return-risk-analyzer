@@ -2,7 +2,7 @@
 Predict v2 Module - Alias to Customer Return Risk Analyzer API (predict.py).
 """
 
-from predict import app, load_or_train_model, risk_model
+from predict import app, risk_model
 
 if __name__ == "__main__":
     import uvicorn

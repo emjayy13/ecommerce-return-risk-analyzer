@@ -5,15 +5,13 @@ import json
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi.testclient import TestClient
-from predict import app, load_or_train_model, risk_model
+from predict import app, risk_model
 
 
 def test_continuous_learning():
     print("=" * 70)
     print("  TESTING CONTINUOUS LEARNING V2 PIPELINE & FASTAPI ENDPOINTS")
     print("=" * 70)
-
-    load_or_train_model()
 
     with TestClient(app) as client:
         # 1. Health & Model Info
@@ -73,7 +71,6 @@ def test_continuous_learning():
         assert res_hist.json()["total_retrain_runs"] >= 2
 
         # 6. Verify Model Version Binaries on Disk
-        # Correct path for ml/models/versions
         src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         ml_dir = os.path.dirname(src_dir)
         versions_dir = os.path.join(ml_dir, 'models', 'versions')

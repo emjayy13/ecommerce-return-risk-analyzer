@@ -5,12 +5,10 @@ import json
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi.testclient import TestClient
-from predict import app, load_or_train_model
+from predict import app, risk_model
 
 
 def test_api():
-    load_or_train_model()
-    
     with TestClient(app) as client:
         print("=" * 60)
         print("  TESTING FASTAPI CUSTOMER RETURN RISK ANALYZER ENDPOINTS")

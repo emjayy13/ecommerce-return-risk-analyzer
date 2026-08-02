@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi.testclient import TestClient
-from predict import app, load_or_train_model
+from predict import app, risk_model
 
 
 def run_batch_20_requests_test():
@@ -16,9 +16,6 @@ def run_batch_20_requests_test():
     print("  RUNNING LIVE BATCH TEST: 20 CUSTOMER RETURN REQUESTS & METRIC EVALUATION")
     print("=" * 105)
 
-    load_or_train_model()
-
-    # Determine correct path for ml/data/customer_features.csv
     src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ml_dir = os.path.dirname(src_dir)
     features_csv = os.path.join(ml_dir, 'data', 'customer_features.csv')

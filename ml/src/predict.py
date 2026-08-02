@@ -1,42 +1,49 @@
 import os
 import sys
-import pandas as pd
-from typing import Optional, Dict, Any, List
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from typing import Optional, Dict, Any
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, ConfigDict
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from customer_risk_model import CustomerRiskModel
 
 app = FastAPI(
-    title="Customer Return Risk Analyzer API - Continuous Learning v2",
-    description="API for predicting customer return risk scores (0–100) and managing continuous learning retraining pipelines.",
+    title="Customer Return Risk Analyzer API",
+    description="Predicts customer return risk scores (0-100) with continuous learning.",
     version="3.1.0"
 )
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(BASE_DIR, 'models', 'customer_risk_model.pkl')
+FEATURES_PATH = os.path.join(BASE_DIR, 'data', 'customer_features.csv')
 
 risk_model = CustomerRiskModel(retrain_threshold=10)
 
 
-def load_or_train_model():
-    """Loads active production model or runs initial training if missing."""
-    global risk_model
-    if not risk_model.load_model():
-        print("Model file not found. Running initial training pipeline...")
-        features_csv = os.path.join(BASE_DIR, 'data', 'customer_features.csv')
-        if os.path.exists(features_csv):
-            customer_df = pd.read_csv(features_csv)
-            risk_model.train(customer_df)
-        else:
-            from train import run_full_ml_pipeline
-            risk_model = run_full_ml_pipeline()
+def _validate_startup():
+    """
+    Validates required files exist. Does NOT train or generate data.
+    Training is a separate concern handled by train.py.
+    """
+    if not os.path.exists(MODEL_PATH):
+        raise RuntimeError(
+            "Model not found. Please run: python ml/src/train.py"
+        )
+    if not os.path.exists(FEATURES_PATH):
+        raise RuntimeError(
+            "Features file not found. Please run: python ml/src/train.py"
+        )
 
 
 @app.on_event("startup")
 def startup_event():
-    load_or_train_model()
+    _validate_startup()
+    risk_model.load_model()
 
+
+# ──────────────────────────────────────────────
+#  Request / Response Models
+# ──────────────────────────────────────────────
 
 class ReturnRequest(BaseModel):
     customer_id: str = Field(..., description="Unique customer identifier", example="CUST000063")
@@ -58,27 +65,27 @@ class ReturnRequest(BaseModel):
 
 class FeedbackRequest(BaseModel):
     customer_id: str = Field(..., description="Customer ID", example="CUST000063")
-    actual_fraud_label: int = Field(..., description="Actual ground-truth audit label (1 = Fraud/Abuse, 0 = Legitimate)", example=1)
-    notes: Optional[str] = Field("Manual audit outcome", description="Audit investigation notes", example="Company audit confirmed synthetic item switch")
+    actual_fraud_label: int = Field(..., description="Ground-truth label (1=Fraud, 0=Legitimate)", example=1)
+    notes: Optional[str] = Field("Manual audit outcome", description="Audit notes", example="Verified fraud")
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
             "customer_id": "CUST000063",
             "actual_fraud_label": 1,
-            "notes": "Verified fraud after manual return inspection"
+            "notes": "Verified fraud after manual inspection"
         }
     })
 
 
 class RiskPredictionResponse(BaseModel):
     customer_id: str
-    risk_score: float = Field(..., description="Customer return risk score from 0 to 100")
+    risk_score: float = Field(..., description="Risk score from 0 to 100")
     risk_level: str = Field(..., description="Risk tier: Low, Medium, High")
-    risk_probability: float = Field(..., description="Probability score between 0.0 and 1.0")
-    prediction_method: str = Field(..., description="Method used: ml_model, new_customer_baseline, or rule_based_fallback")
+    risk_probability: float = Field(..., description="Probability between 0.0 and 1.0")
+    prediction_method: str = Field(..., description="ml_model, new_customer_baseline, or rule_based_fallback")
     model_version: str = Field(..., description="Trained model version identifier")
-    recommendation: str = Field(..., description="Actionable recommendation for merchant")
-    customer_history: Dict[str, Any] = Field(..., description="Historical customer features from database")
+    recommendation: str = Field(..., description="Actionable recommendation")
+    customer_history: Dict[str, Any] = Field(..., description="Customer features from database")
 
 
 class NewCustomerResponse(BaseModel):
@@ -90,11 +97,15 @@ class NewCustomerResponse(BaseModel):
     recommendation: str
 
 
+# ──────────────────────────────────────────────
+#  Endpoints
+# ──────────────────────────────────────────────
+
 @app.get("/")
 def read_root():
     return {
         "status": "online",
-        "service": "Customer Return Risk Analyzer API - Continuous Learning v2",
+        "service": "Customer Return Risk Analyzer API",
         "version": "3.1.0",
         "docs_url": "/docs"
     }
@@ -114,9 +125,9 @@ def health_check():
 
 @app.get("/model/info")
 def get_model_info():
-    """Returns active model details, version, feedback stats, and current metrics."""
+    """Active model details, version, feedback stats, and metrics."""
     if risk_model.model is None:
-        raise HTTPException(status_code=500, detail="Model not loaded")
+        raise HTTPException(status_code=503, detail="Model not loaded. Run: python ml/src/train.py")
     return {
         "active_model_version": risk_model.version,
         "metrics": risk_model.metrics,
@@ -129,9 +140,9 @@ def get_model_info():
 
 @app.get("/model/metrics")
 def get_model_metrics():
-    """Returns detailed evaluation metrics and cross-validation breakdown."""
+    """Detailed evaluation metrics and cross-validation breakdown."""
     if risk_model.model is None:
-        raise HTTPException(status_code=500, detail="Model not initialized")
+        raise HTTPException(status_code=503, detail="Model not loaded. Run: python ml/src/train.py")
     return {
         "version": risk_model.version,
         "metrics": risk_model.metrics,
@@ -143,11 +154,11 @@ def get_model_metrics():
 @app.post("/predict", response_model=RiskPredictionResponse)
 def predict_customer_risk(request: ReturnRequest):
     """
-    Predicts risk score (0–100) and risk level (Low, Medium, High) for a customer's return request.
-    Fetches historical features from database if existing, or uses sensible default baselines for new customers.
+    Predicts risk score (0-100) and risk level for a customer return request.
+    Uses historical features if customer exists, or default baselines for new customers.
     """
     if risk_model.model is None:
-        load_or_train_model()
+        raise HTTPException(status_code=503, detail="Model not loaded. Run: python ml/src/train.py")
 
     customer_features = risk_model.get_customer_features(request.customer_id)
 
@@ -185,7 +196,7 @@ def predict_customer_risk(request: ReturnRequest):
 
 @app.post("/predict-new-customer", response_model=NewCustomerResponse)
 def predict_new_customer(request: ReturnRequest):
-    """Explicit endpoint to handle brand-new customer return requests and initialize history."""
+    """Handles brand-new customer return requests."""
     default_features = risk_model.get_default_features(request.customer_id)
     prediction = risk_model.predict_risk(default_features)
     risk_model.update_customer_history(request.customer_id, request.model_dump())
@@ -203,28 +214,27 @@ def predict_new_customer(request: ReturnRequest):
 @app.post("/feedback")
 def submit_ground_truth_feedback(feedback: FeedbackRequest):
     """
-    Submits verified ground-truth audit label for a customer return request.
-    Appends to historical dataset and triggers automated retraining if threshold is reached.
+    Submits verified ground-truth audit label.
+    Triggers automated retraining when threshold is reached.
     """
     if risk_model.model is None:
-        load_or_train_model()
+        raise HTTPException(status_code=503, detail="Model not loaded. Run: python ml/src/train.py")
 
-    result = risk_model.record_ground_truth_feedback(
+    return risk_model.record_ground_truth_feedback(
         customer_id=feedback.customer_id,
         actual_fraud_label=feedback.actual_fraud_label,
         notes=feedback.notes
     )
-    return result
 
 
 @app.post("/retrain")
 def trigger_retraining(force: bool = True):
     """
-    Manually triggers automated retraining & Champion vs. Challenger model evaluation.
-    Promotes challenger model only if it outperforms the active production champion.
+    Manually triggers retraining. Champion vs. Challenger evaluation.
+    Promotes only if challenger outperforms champion.
     """
     if risk_model.model is None:
-        load_or_train_model()
+        raise HTTPException(status_code=503, detail="Model not loaded. Run: python ml/src/train.py")
 
     audit_entry = risk_model.retrain_pipeline(force=force, reason="Triggered via POST /retrain")
     return {
@@ -236,7 +246,7 @@ def trigger_retraining(force: bool = True):
 
 @app.get("/retrain/history")
 def get_retraining_history():
-    """Returns complete audit log history of all past continuous retraining runs."""
+    """Complete audit log of all past retraining runs."""
     return {
         "total_retrain_runs": len(risk_model.get_retraining_history()),
         "retraining_history": risk_model.get_retraining_history()
@@ -245,7 +255,7 @@ def get_retraining_history():
 
 @app.post("/update-history")
 def update_history(request: ReturnRequest):
-    """Updates customer transaction and return history in the database."""
+    """Updates customer transaction and return history."""
     updated_features = risk_model.update_customer_history(request.customer_id, request.model_dump())
     return {
         "status": "success",
@@ -258,7 +268,7 @@ def update_history(request: ReturnRequest):
 
 @app.get("/customer/{customer_id}")
 def get_customer_profile(customer_id: str):
-    """Lookup customer profile and current risk score evaluation."""
+    """Lookup customer profile and current risk score."""
     features = risk_model.get_customer_features(customer_id)
     if features is None:
         return {

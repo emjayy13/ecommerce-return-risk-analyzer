@@ -35,9 +35,20 @@ def _validate_startup():
         )
 
 
+# @app.on_event("startup")
+# def startup_event():
+#     _validate_startup()
+#     risk_model.load_model()
+
+
+from train import run_full_ml_pipeline
+
 @app.on_event("startup")
 def startup_event():
-    _validate_startup()
+    if not os.path.exists(MODEL_PATH) or not os.path.exists(FEATURES_PATH):
+        print("Model or features not found. Training model...")
+        run_full_ml_pipeline()
+
     risk_model.load_model()
 
 

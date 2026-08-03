@@ -1,0 +1,236 @@
+{
+  "total_requests": 20,
+  "overall_accuracy_percentage": 75.0,
+  "precision_percentage": 54.55,
+  "recall_percentage": 100.0,
+  "f1_score_percentage": 70.59,
+  "roc_auc_score": 0.9762,
+  "confusion_matrix": {
+    "TN": 9,
+    "FP": 5,
+    "FN": 0,
+    "TP": 6
+  },
+  "detailed_requests": [
+    {
+      "Req": 1,
+      "Customer_ID": "CUST001364",
+      "Category": "Clothing",
+      "Reason": "Wrong item",
+      "Actual": "Fraud",
+      "Risk_Score": 83.3,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "PASS"
+    },
+    {
+      "Req": 2,
+      "Customer_ID": "CUST000049",
+      "Category": "Clothing",
+      "Reason": "Not as described",
+      "Actual": "Normal",
+      "Risk_Score": 1.1,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    },
+    {
+      "Req": 3,
+      "Customer_ID": "CUST000667",
+      "Category": "Electronics",
+      "Reason": "Wrong item",
+      "Actual": "Normal",
+      "Risk_Score": 0.82,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    },
+    {
+      "Req": 4,
+      "Customer_ID": "CUST000961",
+      "Category": "Clothing",
+      "Reason": "Defective",
+      "Actual": "Fraud",
+      "Risk_Score": 99.94,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "PASS"
+    },
+    {
+      "Req": 5,
+      "Customer_ID": "CUST001172",
+      "Category": "Home",
+      "Reason": "Defective",
+      "Actual": "Normal",
+      "Risk_Score": 85.34,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "FAIL"
+    },
+    {
+      "Req": 6,
+      "Customer_ID": "CUST000284",
+      "Category": "Books",
+      "Reason": "Defective",
+      "Actual": "Fraud",
+      "Risk_Score": 83.85,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "PASS"
+    },
+    {
+      "Req": 7,
+      "Customer_ID": "CUST001184",
+      "Category": "Books",
+      "Reason": "Wrong item",
+      "Actual": "Normal",
+      "Risk_Score": 0.94,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    },
+    {
+      "Req": 8,
+      "Customer_ID": "CUST000520",
+      "Category": "Books",
+      "Reason": "Size issue",
+      "Actual": "Fraud",
+      "Risk_Score": 99.96,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "PASS"
+    },
+    {
+      "Req": 9,
+      "Customer_ID": "CUST000054",
+      "Category": "Clothing",
+      "Reason": "Wrong item",
+      "Actual": "Normal",
+      "Risk_Score": 1.26,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    },
+    {
+      "Req": 10,
+      "Customer_ID": "CUST000655",
+      "Category": "Home",
+      "Reason": "Size issue",
+      "Actual": "Normal",
+      "Risk_Score": 82.25,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "FAIL"
+    },
+    {
+      "Req": 11,
+      "Customer_ID": "CUST000721",
+      "Category": "Clothing",
+      "Reason": "Defective",
+      "Actual": "Normal",
+      "Risk_Score": 0.87,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    },
+    {
+      "Req": 12,
+      "Customer_ID": "CUST001140",
+      "Category": "Books",
+      "Reason": "Wrong item",
+      "Actual": "Fraud",
+      "Risk_Score": 100.0,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "PASS"
+    },
+    {
+      "Req": 13,
+      "Customer_ID": "CUST001285",
+      "Category": "Books",
+      "Reason": "Not as described",
+      "Actual": "Normal",
+      "Risk_Score": 1.01,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    },
+    {
+      "Req": 14,
+      "Customer_ID": "CUST000693",
+      "Category": "Clothing",
+      "Reason": "Size issue",
+      "Actual": "Normal",
+      "Risk_Score": 0.56,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    },
+    {
+      "Req": 15,
+      "Customer_ID": "CUST000832",
+      "Category": "Books",
+      "Reason": "Wrong item",
+      "Actual": "Fraud",
+      "Risk_Score": 99.97,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "PASS"
+    },
+    {
+      "Req": 16,
+      "Customer_ID": "CUST000815",
+      "Category": "Electronics",
+      "Reason": "Defective",
+      "Actual": "Normal",
+      "Risk_Score": 80.83,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "FAIL"
+    },
+    {
+      "Req": 17,
+      "Customer_ID": "CUST000274",
+      "Category": "Toys",
+      "Reason": "Changed mind",
+      "Actual": "Normal",
+      "Risk_Score": 0.86,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    },
+    {
+      "Req": 18,
+      "Customer_ID": "CUST000065",
+      "Category": "Clothing",
+      "Reason": "Size issue",
+      "Actual": "Normal",
+      "Risk_Score": 79.84,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "FAIL"
+    },
+    {
+      "Req": 19,
+      "Customer_ID": "CUST000127",
+      "Category": "Electronics",
+      "Reason": "Size issue",
+      "Actual": "Normal",
+      "Risk_Score": 81.1,
+      "Risk_Level": "High",
+      "Predicted": "Fraud",
+      "Match": "FAIL"
+    },
+    {
+      "Req": 20,
+      "Customer_ID": "CUST000733",
+      "Category": "Books",
+      "Reason": "Defective",
+      "Actual": "Normal",
+      "Risk_Score": 1.32,
+      "Risk_Level": "Low",
+      "Predicted": "Normal",
+      "Match": "PASS"
+    }
+  ]
+}

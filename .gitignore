@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ML data files (regenerate via `python ml/src/train.py`)
+ml/data/*.csv
+ml/data/*.zip
+
+# ML model binaries and metadata (regenerate via training)
+ml/models/*.pkl
+ml/models/*.json
+ml/models/versions/*.pkl
+ml/models/versions/*_metrics.json

@@ -1,0 +1,21 @@
+{
+  "version": "RandomForest_20260731_222059",
+  "timestamp": "2026-07-31T22:20:59.964925",
+  "metrics": {
+    "model": "RandomForestClassifier(class_weight='balanced', max_depth=8, n_estimators=200,\n                       n_jobs=-1, random_state=42)",
+    "accuracy": 1.0,
+    "f1": 1.0,
+    "auc_roc": 1.0,
+    "pr_auc": 1.0000000000000002,
+    "train_time": 0.7826385498046875
+  },
+  "features": [
+    "total_orders",
+    "return_ratio",
+    "avg_return_window",
+    "vague_reason_count",
+    "mismatch_flag_history",
+    "most_common_category"
+  ],
+  "total_customers": 1360
+}

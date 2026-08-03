@@ -1,5 +1,6 @@
 const Customer = require("../models/Customer");
 const Return = require("../models/Return");
+const { predictRisk } = require("../services/mlService");
 const {
   calculateRiskScore,
   RISKY_CATEGORIES,
@@ -70,18 +71,32 @@ const createReturn = async (req, res) => {
       (item) => item.mismatchFlag
     ).length;
 
-    const { score, riskLevel } = calculateRiskScore({
-      returnRatio,
-      avgReturnWindow,
-      riskyCategoryCount,
-      vagueReasonCount,
-      avgCustomerRating,
-      mismatchHistory,
+    // const { score, riskLevel } = calculateRiskScore({
+    //   returnRatio,
+    //   avgReturnWindow,
+    //   riskyCategoryCount,
+    //   vagueReasonCount,
+    //   avgCustomerRating,
+    //   mismatchHistory,
+    // });
+
+    // existingCustomer.riskScore = score;
+    // existingCustomer.riskLevel = riskLevel;
+
+      const prediction = await predictRisk({
+      customer_id: existingCustomer._id.toString(),
+      order_id: orderId,
+      product_category: category,
+      return_reason: reason,
+      is_returned: true,
     });
 
-    existingCustomer.riskScore = score;
-    existingCustomer.riskLevel = riskLevel;
+    //console.log("ML Prediction:", prediction);
 
+    const score = prediction.risk_score;
+    const riskLevel = prediction.risk_level;
+    
+    
     await existingCustomer.save();
 
 

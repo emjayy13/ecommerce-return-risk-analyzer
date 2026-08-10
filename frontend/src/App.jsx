@@ -6,6 +6,7 @@ import CustomerTable from './components/CustomerTable.jsx'
 import ReturnTrendChart from './components/ReturnTrendChart.jsx'
 import RiskSegmentsChart from './components/RiskSegmentsChart.jsx'
 import SummaryCard from './components/SummaryCard.jsx'
+import Navbar from './components/Navbar.jsx'
 import {
   getCategoryStats,
   getCustomerById,
@@ -194,11 +195,22 @@ function App() {
 
   return (
     <main>
-      <header>
-        <p>Operations Dashboard</p>
-        <h1>Customer Return Risk Analyzer</h1>
-        <p>Monitor customer return behaviour and identify potential risk.</p>
-      </header>
+  <Navbar />
+
+  <header id="dashboard" className="dashboard-hero">
+  <div className="dashboard-hero__content">
+    <p className="dashboard-hero__eyebrow">Operations Dashboard</p>
+    <h1>Customer Return Risk Analyzer</h1>
+    <p className="dashboard-hero__description">
+      Monitor customer return behaviour and identify potential risk.
+    </p>
+  </div>
+
+  <div className="dashboard-hero__badge">
+    <span className="dashboard-hero__badge-icon" aria-hidden="true"></span>
+    Risk monitoring workspace
+  </div>
+</header>
 
       {(isLoadingDashboard ||
         isLoadingCustomers ||
@@ -239,7 +251,7 @@ function App() {
         </div>
       </section>
 
-      <section aria-labelledby="filters-heading">
+      <section id="customers" aria-labelledby="filters-heading">
         <h2 id="filters-heading">Filters</h2>
 
         <div className="filter-controls">
@@ -290,17 +302,21 @@ function App() {
         onViewProfile={handleViewProfile}
       />
 
-      <section className="charts-section" aria-labelledby="charts-heading">
+      <section
+  id="analytics"
+  className="charts-section"
+  aria-labelledby="charts-heading"
+>
         <h2 id="charts-heading">Charts & Insights</h2>
 
-        <div className="chart-grid">
-          <CategoryReturnsChart data={categoryReturnData} />
-          <RiskSegmentsChart data={riskSegmentData} />
+       <div className="chart-grid">
+  <div className="chart-grid__full">
+    <ReturnTrendChart data={returnTrendData} />
+  </div>
 
-          <div className="chart-grid__full">
-            <ReturnTrendChart data={returnTrendData} />
-          </div>
-        </div>
+  <CategoryReturnsChart data={categoryReturnData} />
+  <RiskSegmentsChart data={riskSegmentData} />
+</div>
       </section>
 
       <CustomerDetailModal
